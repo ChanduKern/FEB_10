@@ -1,31 +1,55 @@
+import java.util.Scanner;
+
 public class MainApp {
 
     public static void main(String[] args) {
 
-        Movie movie = new Movie("Inception");
-        Theatre theatre = new Theatre(movie, 10);
+        Scanner sc = new Scanner(System.in);
 
-        Thread t1 = new Thread(
-                new BookingTask(theatre, "User-1", 4, "SILVER"));
+        System.out.print("Enter Movie Name: ");
+        String movieName = sc.nextLine();
 
-        Thread t2 = new Thread(
-                new BookingTask(theatre, "User-2", 3, "GOLD"));
+        System.out.print("Enter Total Seats: ");
+        int seats = sc.nextInt();
+        sc.nextLine();
 
-        Thread t3 = new Thread(
-                new BookingTask(theatre, "User-3", 5, "PLATINUM"));
+        Movie movie = new Movie(movieName);
+        Theatre theatre = new Theatre(movie, seats);
 
-        t1.start();
-        t2.start();
-        t3.start();
+        System.out.print("Enter number of users booking tickets: ");
+        int users = sc.nextInt();
+        sc.nextLine();
 
-        try {
-            t1.join();
-            t2.join();
-            t3.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        Thread[] threads = new Thread[users];
+
+        for (int i = 0; i < users; i++) {
+
+            System.out.println("\nUser " + (i + 1));
+            System.out.print("Enter User Name: ");
+            String userName = sc.nextLine();
+
+            System.out.print("Enter number of seats: ");
+            int seatCount = sc.nextInt();
+            sc.nextLine();
+
+            System.out.print("Enter Seat Category (SILVER / GOLD / PLATINUM): ");
+            String category = sc.nextLine();
+
+            threads[i] = new Thread(
+                    new BookingTask(theatre, userName, seatCount, category),
+                    userName);
+            threads[i].start();
+        }
+
+        for (Thread t : threads) {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         theatre.showBookingHistory();
+        sc.close();
     }
 }
